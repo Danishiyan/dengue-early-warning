@@ -1,3 +1,6 @@
+# macOS system files
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -221,3 +224,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- Project-specific ----
+# Data is downloaded by code, never stored in Git
+data/raw/*
+data/processed/*
+data/external/*
+!data/*/.gitkeep
+
+# Trained models (re-create by running the training script)
+models/*
+!models/.gitkeep
