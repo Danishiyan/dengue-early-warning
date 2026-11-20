@@ -2,4 +2,6 @@ requests
 pandas
 pyreadr
 matplotlib
+pytest
+
 
