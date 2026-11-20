@@ -10,11 +10,29 @@ temperature with a delay of a few weeks. This project predicts **next weeks' den
 per district** so that health teams could act early.
 
 ## Planned approach
-1. Collect weekly district dengue cases (Ministry of Health / Epidemiology Unit data)
+1. ✅ Collect weekly dengue cases per district (see **Data** below)
 2. Join weekly weather per district (rainfall, temperature, humidity)
 3. Build time-series features (lags, rolling averages)
 4. Compare against simple baselines, then train ML models with time-series cross-validation
 5. Serve predictions with an API, package with Docker, deploy to Azure
+
+## Data
+| | |
+|---|---|
+| **Source** | Weekly Epidemiological Reports, Epidemiology Unit, Ministry of Health, Sri Lanka — in tidy form via the [denguedatahub](https://github.com/thiyangt/denguedatahub) R package by Thiyanga Talagala (GPL-3) |
+| **Coverage** | Week 52 of 2006 → week 37 of 2026 (weekly) |
+| **Areas** | 26 health areas: the 25 districts + Kalmunai (a separate regional health area) |
+| **Size** | 26,753 rows · columns `year, week, start_date, end_date, district, cases` |
+| **Quality checks** | 0 missing values · 0 duplicate (year, week, area) rows · two date formats in the source, unified while loading |
+
+The data is **not stored in this repo**. One command downloads it and converts it to CSV:
+
+```bash
+pip install -r requirements.txt
+python -m src.download_data
+# -> data/raw/srilanka_weekly_data.rda (original)
+# -> data/raw/dengue_weekly.csv       (tidy CSV)
+```
 
 ## Project structure
 ```
