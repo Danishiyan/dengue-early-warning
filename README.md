@@ -17,7 +17,8 @@ per district** so that health teams could act early.
 5. ✅ Simple baselines with time-series cross-validation (see **Baselines** below)
 6. ✅ Gradient boosting model, evaluated per area (see **Model results** below)
 7. ✅ Serve predictions with a FastAPI web service (see **API** below)
-8. Package with Docker, deploy to Azure with CI
+8. ✅ Package with Docker (see **Run with Docker** below)
+9. Deploy to Azure with CI
 
 ## Data
 | | |
@@ -120,6 +121,22 @@ Example: `GET /forecast/jaffna`
 }
 ```
 `data_may_be_incomplete` is `true` for the most recent 4 weeks, because new cases are still being reported for them (found in the EDA).
+
+## Run with Docker
+The image runs the whole pipeline at build time (download data → build features → train model),
+so it starts with fresh data and a trained model inside. Nothing needs to be installed except Docker.
+
+```bash
+docker build -t dengue-api .                       # ~4 min first time (downloads packages + data, trains)
+docker run --rm -p 8000:8000 dengue-api            # start the API
+curl http://localhost:8000/health                  # {"status":"ok"}
+curl http://localhost:8000/forecast/colombo
+```
+Then open **http://localhost:8000/docs**. Stop with `Ctrl+C`.
+
+- Base image `python:3.12-slim`, runtime packages only (`requirements.txt`), runs as a non-root user.
+- Image size: ~865 MB (mostly pandas, scikit-learn, scipy and matplotlib).
+- Rebuilding the image re-downloads the data and retrains the model, which makes it the way to refresh forecasts.
 
 ## Project structure
 ```
