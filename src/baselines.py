@@ -1,8 +1,11 @@
 """Simple forecasts that every ML model must beat."""
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
-from src.features import FEATURES_CSV
+from src.features import FEATURES_CSV, PROJECT_ROOT
+
+REPORTS_DIR = PROJECT_ROOT / "reports"
 
 TEST_YEARS = range(2021, 2026)
 
@@ -45,3 +48,14 @@ if __name__ == "__main__":
     print("MAE (cases per area per week), lower is better:\n")
     print(results.to_string())
     print("\nAverage:", results.mean().round(1).to_dict())
+
+    results.to_csv(REPORTS_DIR / "baseline_results.csv")
+
+    fig, ax = plt.subplots(figsize=(9, 4))
+    results.plot(kind="bar", ax=ax)
+    ax.set_title("Baseline error by test year (MAE, lower is better)")
+    ax.set_xlabel("Test year")
+    ax.set_ylabel("MAE (cases per area per week)")
+    ax.legend(["Same as last week", "Mean of last 4 weeks", "Same week last year"])
+    fig.tight_layout()
+    fig.savefig(REPORTS_DIR / "figures" / "06_baseline_mae.png", dpi=150)
