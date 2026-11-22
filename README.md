@@ -10,15 +10,15 @@ Forecasting next week’s dengue cases for 26 Sri Lankan health areas from Minis
 
 ```mermaid
 flowchart LR
-    A[MoH weekly data<br/>.rda file] -->|download_data.py| B[(dengue_weekly.csv)]
-    B -->|features.py<br/>lags 1–8, rolling mean, week sin/cos| C[(features.csv)]
-    C -->|baselines.py| D[Baseline MAE<br/>last week 11.3]
-    C -->|train.py<br/>time-series CV 2021–2025| E[HistGradientBoosting<br/>MAE 10.7]
-    E -->|joblib| F[(model.joblib)]
-    F --> G[FastAPI<br/>/health /areas /forecast]
-    G --> H[Docker image]
-    H -.->|planned| I[Azure Container Apps]
-    J[GitHub Actions CI<br/>lint → test → docker build] -.-> H
+    A["MoH weekly data (.rda)"] -->|download_data.py| B[("dengue_weekly.csv")]
+    B -->|features.py| C[("features.csv")]
+    C -->|baselines.py| D["Baselines: MAE 11.3"]
+    C -->|train.py| E["Gradient boosting: MAE 10.7"]
+    E -->|joblib| F[("model.joblib")]
+    F --> G["FastAPI service"]
+    G --> H["Docker image"]
+    H -.->|planned| I["Azure Container Apps"]
+    J["GitHub Actions CI: lint, test, build"] -.-> H
 ```
 
 Solid arrows show data flow (labelled with the script that runs each step); dashed arrows are planned work or checks.
@@ -108,7 +108,7 @@ python -m pytest -v       # run unit tests
 
 **What I learned:** the first model was ~15% *worse* than the baseline because this week's cases were missing from the features and the training loss (squared error) didn't match the reported metric (MAE). Fixing both made it beat the baseline. A unit test now guards the feature list.
 
-**Limitations:** gains are modest (5.6%); case history alone can't anticipate sudden outbreaks in big areas. Next step (v2): add rainfall and temperature, and try predicting % change for large areas. Retraining on Linux (Docker/CI) gives about 6.0% instead of 5.6%, because of small floating-point differences between platforms; results are reproducible on the same platform (`random_state=42`).
+**Limitations:** gains are modest (5.6%); case history alone can't anticipate sudden outbreaks in big areas. Next step (v2): add rainfall and temperature, and try predicting % change for large areas. Retraining on Linux (Docker/CI) gives about 6.0% instead of 5.6%. Data, library versions and `random_state=42` are the same on both, so the most likely cause is small floating-point differences between platforms; results repeat exactly on the same platform.
 
 ```bash
 python -m src.train      # cross-validation + save models/model.joblib
