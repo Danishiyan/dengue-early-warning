@@ -11,12 +11,13 @@ per district** so that health teams could act early.
 
 ## Planned approach
 1. ✅ Collect weekly dengue cases per district (see **Data** below)
-2. Join weekly weather per district (rainfall, temperature, humidity)
+2. ⏭️ v2: join weekly weather per district (rainfall, temperature, humidity)
 3. ✅ Explore the data (EDA) — see findings below
 4. ✅ Build time-series features (lags 1–8, 4-week rolling mean, week-of-year sin/cos) with unit tests
 5. ✅ Simple baselines with time-series cross-validation (see **Baselines** below)
 6. ✅ Gradient boosting model, evaluated per area (see **Model results** below)
-7. Serve predictions with an API, package with Docker, deploy to Azure
+7. ✅ Serve predictions with a FastAPI web service (see **API** below)
+8. Package with Docker, deploy to Azure with CI
 
 ## Data
 | | |
@@ -92,6 +93,33 @@ python -m pytest -v       # run unit tests
 python -m src.train      # cross-validation + save models/model.joblib
 python -m src.evaluate   # per-area errors + forecast chart for 2025
 ```
+
+## API
+A FastAPI service returns next week's forecast for any of the 26 areas.
+
+```bash
+python -m src.train                 # creates models/model.joblib (once)
+uvicorn src.api:app --reload        # start the API
+```
+Then open **http://127.0.0.1:8000/docs** for interactive documentation.
+
+| Endpoint | Returns |
+|---|---|
+| `GET /health` | `{"status": "ok"}` (used by the cloud to check the app is alive) |
+| `GET /areas` | The 26 area names |
+| `GET /forecast/{area}` | Latest week's cases and the forecast for next week |
+
+Example: `GET /forecast/jaffna`
+```json
+{
+  "district": "Jaffna",
+  "week_starting": "2026-09-07",
+  "cases_this_week": 12,
+  "forecast_next_week": 14.8,
+  "data_may_be_incomplete": true
+}
+```
+`data_may_be_incomplete` is `true` for the most recent 4 weeks, because new cases are still being reported for them (found in the EDA).
 
 ## Project structure
 ```
