@@ -11,8 +11,7 @@ import pyreadr
 import requests
 
 RAW_URL = (
-    "https://raw.githubusercontent.com/thiyangt/denguedatahub/"
-    "main/data/srilanka_weekly_data.rda"
+    "https://raw.githubusercontent.com/thiyangt/denguedatahub/main/data/srilanka_weekly_data.rda"
 )
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RDA_PATH = PROJECT_ROOT / "data" / "raw" / "srilanka_weekly_data.rda"
