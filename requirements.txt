@@ -2,3 +2,5 @@ requests
 pandas
 pyreadr
 matplotlib
+scikit-learn
+joblib

@@ -14,8 +14,9 @@ per district** so that health teams could act early.
 2. Join weekly weather per district (rainfall, temperature, humidity)
 3. ✅ Explore the data (EDA) — see findings below
 4. ✅ Build time-series features (lags 1–8, 4-week rolling mean, week-of-year sin/cos) with unit tests
-5. ✅ Simple baselines with time-series cross-validation (see **Baselines** below) → then train ML models
-6. Serve predictions with an API, package with Docker, deploy to Azure
+5. ✅ Simple baselines with time-series cross-validation (see **Baselines** below)
+6. ✅ Gradient boosting model, evaluated per area (see **Model results** below)
+7. Serve predictions with an API, package with Docker, deploy to Azure
 
 ## Data
 | | |
@@ -65,6 +66,31 @@ MAE = mean absolute error in cases per area per week (lower is better). "Same as
 python -m src.features    # build data/processed/features.csv
 python -m src.baselines   # print baseline MAE, save chart + reports/baseline_results.csv
 python -m pytest -v       # run unit tests
+```
+
+## Model results
+**Model:** scikit-learn `HistGradientBoostingRegressor` trained with absolute-error loss on: this week's cases, lags 1–8, 4-week rolling mean, week-of-year (sin/cos) and area. Same time-series cross-validation as the baselines.
+
+| Test year | Baseline (same as last week) | Model |
+|---|---|---|
+| 2021 | 7.1 | **6.8** |
+| 2022 | 12.1 | **10.9** |
+| 2023 | **18.0** | 18.1 |
+| 2024 | 10.7 | **9.5** |
+| 2025 | 8.8 | **8.2** |
+| **Average** | 11.3 | **10.7** (5.6% lower error) |
+
+**Per area (2025):** the model beats the baseline in **23 of 26 areas**, but **not** in the two largest, Colombo and Gampaha, where it under-predicts fast-rising outbreaks (details: `reports/error_by_area_2025.csv`).
+
+![Forecasts for Colombo, Kandy and Jaffna in 2025](reports/figures/07_forecasts_2025.png)
+
+**What I learned:** the first model was ~15% *worse* than the baseline because this week's cases were missing from the features and the training loss (squared error) didn't match the reported metric (MAE). Fixing both made it beat the baseline. A unit test now guards the feature list.
+
+**Limitations:** gains are modest (5.6%); case history alone can't anticipate sudden outbreaks in big areas. Next step (v2): add rainfall and temperature, and try predicting % change for large areas.
+
+```bash
+python -m src.train      # cross-validation + save models/model.joblib
+python -m src.evaluate   # per-area errors + forecast chart for 2025
 ```
 
 ## Project structure
