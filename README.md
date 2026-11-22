@@ -13,8 +13,8 @@ per district** so that health teams could act early.
 1. ✅ Collect weekly dengue cases per district (see **Data** below)
 2. Join weekly weather per district (rainfall, temperature, humidity)
 3. ✅ Explore the data (EDA) — see findings below
-4. Build time-series features (lags, rolling averages)
-5. Compare against simple baselines, then train ML models with time-series cross-validation
+4. ✅ Build time-series features (lags 1–8, 4-week rolling mean, week-of-year sin/cos) with unit tests
+5. ✅ Simple baselines with time-series cross-validation (see **Baselines** below) → then train ML models
 6. Serve predictions with an API, package with Docker, deploy to Azure
 
 ## Data
@@ -47,6 +47,25 @@ Full analysis: [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb)
 - **Recent weeks are the best predictors:** autocorrelation is 0.96 at 1 week and 0.79 at 4 weeks but only 0.07 at 52 weeks → lags of 1–8 weeks as features; weather will be added to predict outbreak size.
 
 ![Seasonal pattern by area](reports/figures/04_seasonality_by_area.png)
+
+## Baselines
+Every model must beat these simple forecasts. Evaluated with **expanding-window time-series cross-validation**: train on all earlier years, test on one year (2021–2025), so the model never sees the future.
+
+| Baseline | Rule | MAE (avg 2021–2025) |
+|---|---|---|
+| Same as last week | next week = this week | **11.3** |
+| Mean of last 4 weeks | average of the last 4 weeks | 12.1 |
+| Same week last year | value 52 weeks earlier | 27.9 |
+
+MAE = mean absolute error in cases per area per week (lower is better). "Same as last week" is the bar the ML model has to beat.
+
+![Baseline MAE by year](reports/figures/06_baseline_mae.png)
+
+```bash
+python -m src.features    # build data/processed/features.csv
+python -m src.baselines   # print baseline MAE, save chart + reports/baseline_results.csv
+python -m pytest -v       # run unit tests
+```
 
 ## Project structure
 ```
