@@ -9,7 +9,7 @@ Forecasting next week’s dengue cases for 26 Sri Lankan health areas from Minis
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["MoH weekly data (.rda)"] -->|download_data.py| B[("dengue_weekly.csv")]
     B -->|features.py| C[("features.csv")]
     C -->|baselines.py| D["Baselines: MAE 11.3"]
