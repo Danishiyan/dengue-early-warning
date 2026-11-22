@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Danishiyan/dengue-early-warning/actions/workflows/ci.yml/badge.svg)](https://github.com/Danishiyan/dengue-early-warning/actions/workflows/ci.yml)
 
-Forecasting weekly dengue risk for Sri Lankan districts from case and weather data.
+Forecasting next week’s dengue cases for 26 Sri Lankan health areas from Ministry of Health weekly case data (weather planned for v2).
 
 > 🚧 Work in progress — Project 2 of my AI/ML portfolio.
 
