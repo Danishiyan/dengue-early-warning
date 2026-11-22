@@ -1,5 +1,7 @@
 # dengue-early-warning
 
+[![CI](https://github.com/Danishiyan/dengue-early-warning/actions/workflows/ci.yml/badge.svg)](https://github.com/Danishiyan/dengue-early-warning/actions/workflows/ci.yml)
+
 Forecasting weekly dengue risk for Sri Lankan districts from case and weather data.
 
 > 🚧 Work in progress — Project 2 of my AI/ML portfolio.
@@ -18,7 +20,8 @@ per district** so that health teams could act early.
 6. ✅ Gradient boosting model, evaluated per area (see **Model results** below)
 7. ✅ Serve predictions with a FastAPI web service (see **API** below)
 8. ✅ Package with Docker (see **Run with Docker** below)
-9. Deploy to Azure with CI
+9. ✅ CI with GitHub Actions: Ruff lint, pytest and a Docker build on every push and PR to `main`
+10. Deploy to Azure
 
 ## Data
 | | |
