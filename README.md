@@ -124,6 +124,8 @@ uvicorn src.api:app --reload        # start the API
 ```
 Then open **http://127.0.0.1:8000/docs** for interactive documentation.
 
+![Interactive API docs with a live forecast for Colombo](reports/figures/08_api_docs.png)
+
 | Endpoint | Returns |
 |---|---|
 | `GET /health` | `{"status": "ok"}` (used by the cloud to check the app is alive) |
