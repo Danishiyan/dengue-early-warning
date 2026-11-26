@@ -118,7 +118,7 @@ python -m src.evaluate   # per-area errors + forecast chart for 2025
 ```
 
 ## API
-A FastAPI service returns next week's forecast for any of the 26 areas.
+A FastAPI service returns a one-week-ahead forecast for any of the 26 areas.
 
 ```bash
 python -m src.train                 # creates models/model.joblib (once)
@@ -130,21 +130,22 @@ Then open **http://127.0.0.1:8000/docs** for interactive documentation.
 
 | Endpoint | Returns |
 |---|---|
-| `GET /health` | `{"status": "ok"}` (used by the cloud to check the app is alive) |
+| `GET /health` | `{"status": "ok"}` (used by the cloud and the CI smoke test to check the app is alive) |
 | `GET /areas` | The 26 area names |
-| `GET /forecast/{area}` | Latest week's cases and the forecast for next week |
+| `GET /forecast/{area}` | The latest fully reported week and the forecast for the week after it |
 
-Example: `GET /forecast/jaffna`
+Example: `GET /forecast/colombo`
 ```json
 {
-  "district": "Jaffna",
-  "week_starting": "2026-09-07",
-  "cases_this_week": 12,
-  "forecast_next_week": 14.8,
-  "data_may_be_incomplete": true
+  "district": "Colombo",
+  "based_on_week": "2026-08-10",
+  "cases_that_week": 584,
+  "forecast_week_starting": "2026-08-17",
+  "forecast_cases": 488.3,
+  "weeks_still_being_reported": 4
 }
 ```
-`data_may_be_incomplete` is `true` for the most recent 4 weeks, because new cases are still being reported for them (found in the EDA).
+The newest 4 weeks are still being reported, so their counts are too low (found in the EDA). The API forecasts from the latest **complete** week instead, so a partly reported week never looks like a sudden drop or outbreak. Before this change, the same request used the partly reported week of 7 Sep (11 cases) and forecast 50.5, far below the real level. (The screenshot above shows the earlier response format.)
 
 ## Run with Docker
 The image runs the whole pipeline at build time (download data → build features → train model),

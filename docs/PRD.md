@@ -36,7 +36,7 @@ Dengue is reported weekly for 26 health areas in Sri Lanka (25 districts + Kalmu
 | Risk | Effect | Mitigation |
 |---|---|---|
 | Model is worse than the baseline in Colombo and Gampaha, the two biggest areas | Weaker warnings where most cases happen | State it clearly in the model card; v2 adds weather and tries predicting % change |
-| The latest weeks are often revised as reports arrive | Forecasts from incomplete data | Last 4 weeks flagged as `is_recent`; the API returns `data_may_be_incomplete` |
+| The latest weeks are often revised as reports arrive | Forecasts from incomplete data | Last 4 weeks flagged as `is_recent`; the API forecasts from the latest fully reported week and returns `weeks_still_being_reported` |
 | Missing or irregular weeks in the source data | Wrong lag values | Missing weeks are added as unknown and their rows dropped (with a warning and a test) |
 | Free cloud tiers (memory limits, sleeping services) | Slow first request or crashes | Small image, `/health` check, document cold starts |
 | Case history alone can't foresee sudden outbreaks | Late warnings for sharp spikes | v2: weather features; communicate uncertainty |
