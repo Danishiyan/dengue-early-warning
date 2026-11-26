@@ -1,11 +1,16 @@
 """Evaluate the model on the latest full year: error per area and forecast charts."""
 
+import logging
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from src.baselines import REPORTS_DIR, mae
 from src.config import load_config
+from src.log import setup_logging
 from src.train import FEATURES, load_training_data, make_model
+
+logger = logging.getLogger(__name__)
 
 CONFIG = load_config()
 TEST_YEAR = CONFIG["evaluation"]["final_test_year"]
@@ -61,10 +66,11 @@ def plot_forecasts(test: pd.DataFrame, areas=SHOW_AREAS) -> None:
 
 
 if __name__ == "__main__":
+    setup_logging()
     test = predict_test_year(load_training_data())
     by_area = error_by_area(test)
     by_area.to_csv(REPORTS_DIR / "error_by_area_2025.csv", index=False)
-    print(by_area.to_string(index=False))
+    logger.info("Error by area:\n%s", by_area.to_string(index=False))
     wins = by_area["model_better"].sum()
-    print(f"\nModel beats the baseline in {wins} of {len(by_area)} areas ({TEST_YEAR})")
+    logger.info("Model beats the baseline in %d of %d areas (%d)", wins, len(by_area), TEST_YEAR)
     plot_forecasts(test)

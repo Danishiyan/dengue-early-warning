@@ -21,3 +21,7 @@ def test_values_match_current_code():
     assert config["data"]["max_lag"] == 8
     assert config["evaluation"]["test_years"] == [2021, 2022, 2023, 2024, 2025]
     assert config["model"]["random_state"] == 42
+
+
+def test_logging_level_is_valid():
+    assert load_config()["logging"]["level"] in {"DEBUG", "INFO", "WARNING", "ERROR"}

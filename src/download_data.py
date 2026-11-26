@@ -4,6 +4,7 @@ Source: denguedatahub R package by Thiyanga Talagala (GPL-3)
 https://github.com/thiyangt/denguedatahub
 """
 
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -11,6 +12,9 @@ import pyreadr
 import requests
 
 from src.config import load_config
+from src.log import setup_logging
+
+logger = logging.getLogger(__name__)
 
 RAW_URL = (
     "https://raw.githubusercontent.com/thiyangt/denguedatahub/main/data/srilanka_weekly_data.rda"
@@ -24,14 +28,14 @@ def download_rda(url: str = RAW_URL, dest: Path = RDA_PATH) -> Path:
     """Download the .rda file once; skip if it is already there."""
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists():
-        print(f"Already downloaded: {dest.name}")
+        logger.info("Already downloaded: %s", dest.name)
         return dest
 
-    print(f"Downloading {url}")
+    logger.info("Downloading %s", url)
     response = requests.get(url, timeout=60)
     response.raise_for_status()
     dest.write_bytes(response.content)
-    print(f"Saved {dest.name} ({len(response.content) / 1024:.0f} KB)")
+    logger.info("Saved %s (%.0f KB)", dest.name, len(response.content) / 1024)
     return dest
 
 
@@ -46,10 +50,11 @@ def rda_to_csv(rda_path: Path = RDA_PATH, csv_path: Path = CSV_PATH) -> pd.DataF
 
     df = df.sort_values(["district", "start_date"]).reset_index(drop=True)
     df.to_csv(csv_path, index=False)
-    print(f"Saved {csv_path.name}: {len(df):,} rows, {df['district'].nunique()} areas")
+    logger.info("Saved %s: %d rows, %d areas", csv_path.name, len(df), df["district"].nunique())
     return df
 
 
 if __name__ == "__main__":
+    setup_logging()
     download_rda()
     rda_to_csv()

@@ -21,3 +21,6 @@ evaluation:
 model:
   loss: absolute_error   # same as the metric we report (MAE)
   random_state: 42       # makes training repeatable
+
+logging:
+  level: INFO   # DEBUG shows more detail, WARNING shows only problems

@@ -1,5 +1,7 @@
 """Train a gradient boosting model and compare it with the best baseline."""
 
+import logging
+
 import joblib
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
@@ -7,6 +9,9 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from src.baselines import REPORTS_DIR, mae, time_series_folds
 from src.config import PROJECT_ROOT, load_config
 from src.features import FEATURES_CSV, LAGS
+from src.log import setup_logging
+
+logger = logging.getLogger(__name__)
 
 CONFIG = load_config()
 MODEL_PATH = CONFIG["paths"]["model"]
@@ -53,18 +58,18 @@ def cross_validate(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
+    setup_logging()
     data = load_training_data()
     results = cross_validate(data)
-    print("MAE (cases per area per week), lower is better:\n")
-    print(results.to_string())
+    logger.info("MAE (cases per area per week), lower is better:\n%s", results.to_string())
 
     avg = results.mean()
     gain = (1 - avg["model"] / avg["baseline_last_week"]) * 100
-    print(f"\nAverage: baseline {avg['baseline_last_week']:.1f} | model {avg['model']:.1f}")
-    print(f"Model error is {gain:.1f}% lower than 'same as last week'")
+    logger.info("Average: baseline %.1f | model %.1f", avg["baseline_last_week"], avg["model"])
+    logger.info("Model error is %.1f%% lower than 'same as last week'", gain)
     results.to_csv(REPORTS_DIR / "model_results.csv")
 
     final_model = make_model().fit(data[FEATURES], data["target"])
     MODEL_PATH.parent.mkdir(exist_ok=True)
     joblib.dump(final_model, MODEL_PATH)
-    print(f"Saved final model to {MODEL_PATH.relative_to(PROJECT_ROOT)}")
+    logger.info("Saved final model to %s", MODEL_PATH.relative_to(PROJECT_ROOT))

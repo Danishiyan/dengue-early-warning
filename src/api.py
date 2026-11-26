@@ -1,5 +1,6 @@
 """Web API that serves next-week dengue forecasts."""
 
+import logging
 from functools import lru_cache
 
 import joblib
@@ -9,6 +10,8 @@ from pydantic import BaseModel
 
 from src.features import FEATURES_CSV
 from src.train import FEATURES, MODEL_PATH
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Sri Lanka Dengue Early Warning",
@@ -53,6 +56,7 @@ def forecast(district: str) -> Forecast:
     rows = load_latest_rows()
     row = rows[rows["district"].astype(str).str.lower() == district.lower()]
     if row.empty:
+        logger.warning("Forecast requested for unknown area: %s", district)
         raise HTTPException(status_code=404, detail=f"Unknown area: {district}")
 
     prediction = float(load_model().predict(row[FEATURES])[0])

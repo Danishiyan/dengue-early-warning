@@ -1,9 +1,14 @@
 """Clean the weekly dengue data and build model features."""
 
+import logging
+
 import numpy as np
 import pandas as pd
 
 from src.config import load_config
+from src.log import setup_logging
+
+logger = logging.getLogger(__name__)
 
 CONFIG = load_config()
 RAW_CSV = CONFIG["paths"]["raw_csv"]
@@ -43,12 +48,16 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
+    setup_logging()
     raw = pd.read_csv(RAW_CSV, parse_dates=["start_date", "end_date"])
     data = add_features(clean(raw))
 
     FEATURES_CSV.parent.mkdir(parents=True, exist_ok=True)
     data.to_csv(FEATURES_CSV, index=False)
-    print(f"Saved {FEATURES_CSV.name}: {len(data):,} rows, {data.shape[1]} columns")
+    logger.info("Saved %s: %d rows, %d columns", FEATURES_CSV.name, len(data), data.shape[1])
 
     cols = ["start_date", "cases", "lag_1", "lag_2", "rolling_mean_4", "target"]
-    print(data.loc[data["district"] == "Colombo", cols].tail(3).to_string(index=False))
+    logger.info(
+        "Colombo, last 3 weeks:\n%s",
+        data.loc[data["district"] == "Colombo", cols].tail(3).to_string(index=False),
+    )
