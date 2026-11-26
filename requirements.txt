@@ -1,8 +1,10 @@
-requests
-pandas
-pyreadr
-matplotlib
-scikit-learn
-joblib
-fastapi
-uvicorn
+# Runtime dependencies, pinned to the exact versions tested (Python 3.12).
+# Update on purpose: change a version, run the tests, then commit.
+requests==2.34.2
+pandas==3.1.1
+pyreadr==0.5.9
+matplotlib==3.11.2
+scikit-learn==1.9.1
+joblib==1.6.0
+fastapi==0.165.0
+uvicorn==0.54.0

@@ -1,5 +1,6 @@
+# Development tools (tests, linting, git hooks), pinned like requirements.txt.
 -r requirements.txt
-pytest
-httpx2
-ruff
-pre-commit
+pytest==9.2.0
+httpx2==2.16.2
+ruff==0.17.6
+pre-commit==4.7.0
