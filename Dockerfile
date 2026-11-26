@@ -26,5 +26,8 @@ RUN mkdir -p reports \
     && python -m src.features \
     && python -m src.train
 
+# Cloud platforms (Render, Azure Container Apps) tell the app which port to use through
+# the PORT variable; 8000 is the default for running locally.
+ENV PORT=8000
 EXPOSE 8000
-CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "exec uvicorn src.api:app --host 0.0.0.0 --port ${PORT}"]
