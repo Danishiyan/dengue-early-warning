@@ -1,0 +1,23 @@
+# Project settings in one place. Change values here, not in the code.
+# Paths are relative to the project root.
+
+paths:
+  raw_rda: data/raw/srilanka_weekly_data.rda
+  raw_csv: data/raw/dengue_weekly.csv
+  features_csv: data/processed/features.csv
+  model: models/model.joblib
+  reports: reports
+
+data:
+  start_year: 2010   # earlier years are left out (see EDA in the README)
+  recent_weeks: 4    # latest weeks are still being reported, so not trusted
+  max_lag: 8         # builds lag_1 ... lag_8
+
+evaluation:
+  test_years: [2021, 2022, 2023, 2024, 2025]   # time-series cross-validation
+  final_test_year: 2025                         # per-area evaluation + charts
+  show_areas: [Colombo, Kandy, Jaffna]
+
+model:
+  loss: absolute_error   # same as the metric we report (MAE)
+  random_state: 42       # makes training repeatable
