@@ -28,6 +28,8 @@ Dengue is one of Sri Lanka's biggest public-health problems. Outbreaks follow ra
 temperature with a delay of a few weeks. This project predicts **next week's dengue cases
 per health area** so that health teams could act early.
 
+Goals, users, scope, non-goals and risks are in the [product requirements](docs/PRD.md).
+
 ## Planned approach
 1. ✅ Collect weekly dengue cases per health area (see **Data** below)
 2. ⏭️ v2: join weekly weather per district (rainfall, temperature, humidity)
@@ -169,7 +171,8 @@ data/
 notebooks/      # exploration
 src/            # project code
 tests/          # automated tests
-configs/        # settings (paths, districts, parameters)
+configs/        # settings (config.yaml: paths, data, evaluation, model, logging)
+docs/           # product requirements (PRD)
 models/         # trained models (not in Git)
 reports/figures # charts
 ```
