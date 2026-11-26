@@ -235,3 +235,8 @@ data/external/*
 # Trained models (re-create by running the training script)
 models/*
 !models/.gitkeep
+
+# MLflow tracking data (local only)
+mlruns/
+mlartifacts/
+mlflow.db
