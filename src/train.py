@@ -5,9 +5,11 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
 
 from src.baselines import REPORTS_DIR, mae, time_series_folds
-from src.features import FEATURES_CSV, LAGS, PROJECT_ROOT
+from src.config import PROJECT_ROOT, load_config
+from src.features import FEATURES_CSV, LAGS
 
-MODEL_PATH = PROJECT_ROOT / "models" / "model.joblib"
+CONFIG = load_config()
+MODEL_PATH = CONFIG["paths"]["model"]
 FEATURES = [
     "cases",
     *[f"lag_{k}" for k in LAGS],
@@ -29,7 +31,9 @@ def load_training_data() -> pd.DataFrame:
 def make_model() -> HistGradientBoostingRegressor:
     """Gradient boosting that optimises absolute error (the metric we report)."""
     return HistGradientBoostingRegressor(
-        loss="absolute_error", categorical_features="from_dtype", random_state=42
+        loss=CONFIG["model"]["loss"],
+        categorical_features="from_dtype",
+        random_state=CONFIG["model"]["random_state"],
     )
 
 

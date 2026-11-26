@@ -10,12 +10,14 @@ import pandas as pd
 import pyreadr
 import requests
 
+from src.config import load_config
+
 RAW_URL = (
     "https://raw.githubusercontent.com/thiyangt/denguedatahub/main/data/srilanka_weekly_data.rda"
 )
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-RDA_PATH = PROJECT_ROOT / "data" / "raw" / "srilanka_weekly_data.rda"
-CSV_PATH = PROJECT_ROOT / "data" / "raw" / "dengue_weekly.csv"
+CONFIG = load_config()
+RDA_PATH = CONFIG["paths"]["raw_rda"]
+CSV_PATH = CONFIG["paths"]["raw_csv"]
 
 
 def download_rda(url: str = RAW_URL, dest: Path = RDA_PATH) -> Path:

@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from src.baselines import REPORTS_DIR, mae
+from src.config import load_config
 from src.train import FEATURES, load_training_data, make_model
 
-TEST_YEAR = 2025
-SHOW_AREAS = ["Colombo", "Kandy", "Jaffna"]
+CONFIG = load_config()
+TEST_YEAR = CONFIG["evaluation"]["final_test_year"]
+SHOW_AREAS = CONFIG["evaluation"]["show_areas"]
 
 
 def predict_test_year(df: pd.DataFrame, year: int = TEST_YEAR) -> pd.DataFrame:

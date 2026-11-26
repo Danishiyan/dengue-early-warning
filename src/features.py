@@ -1,17 +1,17 @@
 """Clean the weekly dengue data and build model features."""
 
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-RAW_CSV = PROJECT_ROOT / "data" / "raw" / "dengue_weekly.csv"
-FEATURES_CSV = PROJECT_ROOT / "data" / "processed" / "features.csv"
+from src.config import load_config
 
-START_YEAR = 2010
-RECENT_WEEKS = 4
-LAGS = range(1, 9)
+CONFIG = load_config()
+RAW_CSV = CONFIG["paths"]["raw_csv"]
+FEATURES_CSV = CONFIG["paths"]["features_csv"]
+
+START_YEAR = CONFIG["data"]["start_year"]
+RECENT_WEEKS = CONFIG["data"]["recent_weeks"]
+LAGS = range(1, CONFIG["data"]["max_lag"] + 1)
 
 
 def clean(df: pd.DataFrame) -> pd.DataFrame:

@@ -3,11 +3,12 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from src.features import FEATURES_CSV, PROJECT_ROOT
+from src.config import load_config
+from src.features import FEATURES_CSV
 
-REPORTS_DIR = PROJECT_ROOT / "reports"
-
-TEST_YEARS = range(2021, 2026)
+CONFIG = load_config()
+REPORTS_DIR = CONFIG["paths"]["reports"]
+TEST_YEARS = CONFIG["evaluation"]["test_years"]
 
 
 def add_baselines(df: pd.DataFrame) -> pd.DataFrame:
