@@ -19,9 +19,35 @@ RECENT_WEEKS = CONFIG["data"]["recent_weeks"]
 LAGS = range(1, CONFIG["data"]["max_lag"] + 1)
 
 
+def add_missing_weeks(df: pd.DataFrame) -> pd.DataFrame:
+    """Give every area a row for every reporting week.
+
+    lag and target columns use shift(), which counts rows, not weeks. If an area has no
+    row for a week, its lags would silently use the wrong weeks. A missing week gets
+    cases = NaN, so the rows that depend on it are dropped later instead of being wrong.
+    """
+    weeks = df[["year", "week", "start_date", "end_date"]].drop_duplicates("start_date")
+    areas = df[["district"]].drop_duplicates()
+    full = areas.merge(weeks, how="cross")
+    out = full.merge(
+        df[["district", "start_date", "cases"]], on=["district", "start_date"], how="left"
+    )
+
+    missing = out[out["cases"].isna()]
+    for _, row in missing.iterrows():
+        logger.warning(
+            "Missing week: %s, %s (week %d of %d)",
+            row["district"],
+            row["start_date"].date(),
+            row["week"],
+            row["year"],
+        )
+    return out
+
+
 def clean(df: pd.DataFrame) -> pd.DataFrame:
     """Apply the cleaning decisions from the EDA notebook."""
-    df = df[df["year"] >= START_YEAR].copy()
+    df = add_missing_weeks(df[df["year"] >= START_YEAR])
     df["week_of_year"] = df["week"].clip(upper=52)
 
     last_dates = sorted(df["start_date"].unique())[-RECENT_WEEKS:]
@@ -44,7 +70,8 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     df["week_cos"] = np.cos(angle)
 
     df["target"] = by_area.shift(-1)
-    return df.dropna(subset=[f"lag_{k}" for k in LAGS]).reset_index(drop=True)
+    # Drop rows whose own week or any lag week is missing (see add_missing_weeks).
+    return df.dropna(subset=["cases", *[f"lag_{k}" for k in LAGS]]).reset_index(drop=True)
 
 
 if __name__ == "__main__":
