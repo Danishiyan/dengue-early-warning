@@ -22,12 +22,16 @@ EXPERIMENT = "dengue-next-week-cases"
 
 def log_results(
     results: pd.DataFrame,
-    params: dict,
+    params: dict[str, dict],
     tracking_uri: str,
     artifact_dir: Path,
     version: str = "v1",
 ) -> dict[str, str]:
-    """Log one MLflow run per method (baseline and model). Returns {method: run_id}."""
+    """Log one MLflow run per method (baseline and model). Returns {method: run_id}.
+
+    `params` maps each method to its own settings, so the baseline run doesn't claim
+    model settings it never used.
+    """
     mlflow.set_tracking_uri(tracking_uri)
     if mlflow.get_experiment_by_name(EXPERIMENT) is None:
         mlflow.create_experiment(EXPERIMENT, artifact_location=artifact_dir.as_uri())
@@ -38,7 +42,7 @@ def log_results(
         maes = results[method]
         with mlflow.start_run(run_name=f"{version}-{method}") as run:
             mlflow.set_tags({"version": version, "method": method})
-            mlflow.log_params(params)
+            mlflow.log_params(params[method])
             for year, value in maes.items():
                 mlflow.log_metric(f"mae_{year}", float(value))
             mlflow.log_metric("mae_avg", float(maes.mean()))
@@ -47,17 +51,23 @@ def log_results(
     return run_ids
 
 
-def experiment_params() -> dict:
-    """The settings that decide the result, read from the config."""
+def experiment_params() -> dict[str, dict]:
+    """The settings behind each run, read from the config."""
     config = load_config()
-    return {
-        "model": "HistGradientBoostingRegressor",
-        "loss": config["model"]["loss"],
-        "random_state": config["model"]["random_state"],
+    data = {
         "start_year": config["data"]["start_year"],
-        "max_lag": config["data"]["max_lag"],
         "test_years": ",".join(str(y) for y in config["evaluation"]["test_years"]),
-        "n_features": len(FEATURES),
+    }
+    return {
+        "baseline_last_week": {**data, "rule": "next week = this week"},
+        "model": {
+            **data,
+            "model": "HistGradientBoostingRegressor",
+            "loss": config["model"]["loss"],
+            "random_state": config["model"]["random_state"],
+            "max_lag": config["data"]["max_lag"],
+            "n_features": len(FEATURES),
+        },
     }
 
 

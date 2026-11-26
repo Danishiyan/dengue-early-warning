@@ -11,7 +11,12 @@ def test_log_results_creates_one_run_per_method(tmp_path):
     )
     uri = f"sqlite:///{tmp_path / 'mlflow.db'}"
 
-    run_ids = log_results(results, {"loss": "absolute_error"}, uri, tmp_path / "artifacts")
+    params = {
+        "baseline_last_week": {"rule": "next week = this week"},
+        "model": {"loss": "absolute_error"},
+    }
+
+    run_ids = log_results(results, params, uri, tmp_path / "artifacts")
 
     assert set(run_ids) == {"baseline_last_week", "model"}
     runs = mlflow.search_runs(experiment_names=[EXPERIMENT])
@@ -20,3 +25,6 @@ def test_log_results_creates_one_run_per_method(tmp_path):
     assert model_run["metrics.mae_2025"] == 11.0
     assert model_run["params.loss"] == "absolute_error"
     assert model_run["tags.version"] == "v1"
+
+    baseline_run = runs[runs["run_id"] == run_ids["baseline_last_week"]].iloc[0]
+    assert "params.loss" not in runs.columns or pd.isna(baseline_run["params.loss"])
