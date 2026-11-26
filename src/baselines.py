@@ -1,13 +1,19 @@
 """Simple forecasts that every ML model must beat."""
 
+import logging
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from src.features import FEATURES_CSV, PROJECT_ROOT
+from src.config import load_config
+from src.features import FEATURES_CSV
+from src.log import setup_logging
 
-REPORTS_DIR = PROJECT_ROOT / "reports"
+logger = logging.getLogger(__name__)
 
-TEST_YEARS = range(2021, 2026)
+CONFIG = load_config()
+REPORTS_DIR = CONFIG["paths"]["reports"]
+TEST_YEARS = CONFIG["evaluation"]["test_years"]
 
 
 def add_baselines(df: pd.DataFrame) -> pd.DataFrame:
@@ -32,6 +38,7 @@ def mae(y_true: pd.Series, y_pred: pd.Series) -> float:
 
 
 if __name__ == "__main__":
+    setup_logging()
     data = pd.read_csv(FEATURES_CSV, parse_dates=["start_date"])
     data = add_baselines(data)
     data = data[~data["is_recent"]].dropna(subset=["target", "pred_last_year"])
@@ -45,9 +52,8 @@ if __name__ == "__main__":
         rows.append(row)
 
     results = pd.DataFrame(rows).set_index("test_year").round(1)
-    print("MAE (cases per area per week), lower is better:\n")
-    print(results.to_string())
-    print("\nAverage:", results.mean().round(1).to_dict())
+    logger.info("MAE (cases per area per week), lower is better:\n%s", results.to_string())
+    logger.info("Average: %s", results.mean().round(1).to_dict())
 
     results.to_csv(REPORTS_DIR / "baseline_results.csv")
 

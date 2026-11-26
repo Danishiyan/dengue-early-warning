@@ -1,17 +1,22 @@
 """Clean the weekly dengue data and build model features."""
 
-from pathlib import Path
+import logging
 
 import numpy as np
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-RAW_CSV = PROJECT_ROOT / "data" / "raw" / "dengue_weekly.csv"
-FEATURES_CSV = PROJECT_ROOT / "data" / "processed" / "features.csv"
+from src.config import load_config
+from src.log import setup_logging
 
-START_YEAR = 2010
-RECENT_WEEKS = 4
-LAGS = range(1, 9)
+logger = logging.getLogger(__name__)
+
+CONFIG = load_config()
+RAW_CSV = CONFIG["paths"]["raw_csv"]
+FEATURES_CSV = CONFIG["paths"]["features_csv"]
+
+START_YEAR = CONFIG["data"]["start_year"]
+RECENT_WEEKS = CONFIG["data"]["recent_weeks"]
+LAGS = range(1, CONFIG["data"]["max_lag"] + 1)
 
 
 def clean(df: pd.DataFrame) -> pd.DataFrame:
@@ -43,12 +48,16 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
+    setup_logging()
     raw = pd.read_csv(RAW_CSV, parse_dates=["start_date", "end_date"])
     data = add_features(clean(raw))
 
     FEATURES_CSV.parent.mkdir(parents=True, exist_ok=True)
     data.to_csv(FEATURES_CSV, index=False)
-    print(f"Saved {FEATURES_CSV.name}: {len(data):,} rows, {data.shape[1]} columns")
+    logger.info("Saved %s: %d rows, %d columns", FEATURES_CSV.name, len(data), data.shape[1])
 
     cols = ["start_date", "cases", "lag_1", "lag_2", "rolling_mean_4", "target"]
-    print(data.loc[data["district"] == "Colombo", cols].tail(3).to_string(index=False))
+    logger.info(
+        "Colombo, last 3 weeks:\n%s",
+        data.loc[data["district"] == "Colombo", cols].tail(3).to_string(index=False),
+    )
