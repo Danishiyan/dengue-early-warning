@@ -62,7 +62,7 @@ Full table: `reports/error_by_area_2025.csv`.
 ## Fairness and risk
 - **Uneven quality across areas.** The model is weakest in Colombo and Gampaha, which together had about 39% of 2025's cases. Relying on it there could mean weaker early warnings where the most people are affected. Users in these areas should rely on the baseline or other signals until v2 improves them.
 - **Outbreak years.** In 2023, the biggest outbreak year, the model was no better than the baseline. Case history alone cannot anticipate sudden spikes.
-- **Reporting quality.** Areas with late or missing reports get less reliable forecasts; the API returns `data_may_be_incomplete` for recent weeks.
+- **Reporting quality.** The newest 4 weeks are still being reported, so the API forecasts from each area's latest fully reported week (`based_on_week`) and says how many weeks are pending (`weeks_still_being_reported`). Because of this delay, the forecast is for a week that has usually already started.
 - No personal data is used; all data is aggregated counts per area and week.
 
 ## Limitations and next steps (v2)
