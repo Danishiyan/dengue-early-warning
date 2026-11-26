@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN useradd --create-home --uid 1000 appuser \
     && chown appuser:appuser /app
 
+COPY --chown=appuser:appuser configs/ configs/
 COPY --chown=appuser:appuser src/ src/
 USER appuser
 

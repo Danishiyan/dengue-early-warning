@@ -7,7 +7,6 @@ models/
 notebooks/
 tests/
 reports/
-configs/
 
 # Caches
 __pycache__/
