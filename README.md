@@ -104,7 +104,7 @@ python -m pytest -v       # run unit tests
 | 2025 | 8.8 | **8.2** |
 | **Average** | 11.3 | **10.7** (5.6% lower error) |
 
-**Per area (2025):** the model beats the baseline in **23 of 26 areas**, but **not** in the two largest, Colombo and Gampaha, where it under-predicts fast-rising outbreaks (details: `reports/error_by_area_2025.csv`).
+**Per area (2025):** the model beats the baseline in **23 of 26 areas**. It does **not** in Trincomalee (by a small margin) or in the two largest, Colombo and Gampaha, where it under-predicts fast-rising outbreaks (details: `reports/error_by_area_2025.csv`).
 
 ![Forecasts for Colombo, Kandy and Jaffna in 2025](reports/figures/07_forecasts_2025.png)
 
@@ -116,6 +116,23 @@ python -m pytest -v       # run unit tests
 python -m src.train      # cross-validation + save models/model.joblib
 python -m src.evaluate   # per-area errors + forecast chart for 2025
 ```
+
+## Experiment tracking
+Every cross-validation result is logged to **MLflow** (an open-source tool that records each training run's settings and scores), so a future change, such as adding weather in v2, can be compared with v1 run by run instead of by memory.
+
+- One run per method: `v1-baseline_last_week` and `v1-model`
+- **Parameters:** only the settings each method really used (the baseline logs just its rule, start year and test years)
+- **Metrics:** MAE for each test year (2021–2025) and the average
+
+```bash
+pip install -r requirements-dev.txt
+python -m src.experiment                                   # log both runs
+mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db   # open http://127.0.0.1:5000
+```
+
+![MLflow comparing the v1 baseline and model runs](reports/figures/09_mlflow_compare.png)
+
+Runs are stored locally in `mlruns/` (not in Git).
 
 ## API
 A FastAPI service returns a one-week-ahead forecast for any of the 26 areas.
@@ -145,7 +162,7 @@ Example: `GET /forecast/colombo`
   "weeks_still_being_reported": 4
 }
 ```
-The newest 4 weeks are still being reported, so their counts are too low (found in the EDA). The API forecasts from the latest **complete** week instead, so a partly reported week never looks like a sudden drop or outbreak. Before this change, the same request used the partly reported week of 7 Sep (11 cases) and forecast 50.5, far below the real level. (The screenshot above shows the earlier response format.)
+The newest 4 weeks are still being reported, so their counts are too low (found in the EDA). The API forecasts from the latest **complete** week instead, so a partly reported week never looks like a sudden drop or outbreak. Before this change, the same request used the partly reported week of 7 Sep (11 cases) and forecast 50.5, far below the real level.
 
 ## Run with Docker
 The image runs the whole pipeline at build time (download data → build features → train model),
@@ -175,6 +192,7 @@ tests/          # automated tests
 configs/        # settings (config.yaml: paths, data, evaluation, model, logging)
 docs/           # product requirements (PRD) and model card
 models/         # trained models (not in Git)
+mlruns/         # MLflow experiment runs (not in Git)
 reports/figures # charts
 ```
 
