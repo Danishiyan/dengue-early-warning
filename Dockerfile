@@ -5,6 +5,11 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# Small cloud containers report the host's CPU count, not their real share.
+# One thread stops scikit-learn starting many threads that fight over a tiny CPU.
+ENV OMP_NUM_THREADS=1 \
+    LOKY_MAX_CPU_COUNT=1
+
 WORKDIR /app
 
 # Install runtime packages first, so this layer is cached until requirements.txt changes.
