@@ -4,7 +4,9 @@
 
 Forecasting next week’s dengue cases for 26 Sri Lankan health areas from Ministry of Health weekly case data (weather planned for v2).
 
-> 🚧 Work in progress — Project 2 of my AI/ML portfolio.
+**🌐 Live demo:** [dengue-early-warning-lwgf.onrender.com/docs](https://dengue-early-warning-lwgf.onrender.com/docs) — try `GET /forecast/{area}` in the browser (first request after a quiet period can take ~50 s while the free server wakes up).
+
+> Project 2 of my AI/ML portfolio · v1 deployed on Render · Azure deployment planned.
 
 ## Architecture
 
@@ -17,6 +19,7 @@ flowchart TD
     E -->|joblib| F[("model.joblib")]
     F --> G["FastAPI service"]
     G --> H["Docker image"]
+    H -->|auto-deploy from main| R["Render (live)"]
     H -.->|planned| I["Azure Container Apps"]
     J["GitHub Actions CI: lint, test, build"] -.-> H
 ```
@@ -40,7 +43,7 @@ Goals, users, scope, non-goals and risks are in the [product requirements](docs/
 7. ✅ Serve predictions with a FastAPI web service (see **API** below)
 8. ✅ Package with Docker (see **Run with Docker** below)
 9. ✅ CI with GitHub Actions: Ruff lint, pytest and a Docker build on every push and PR to `main`
-10. Deploy to Azure
+10. ✅ Deploy to the cloud: live on Render (see **Deployment** below); Azure Container Apps planned
 
 ## Data
 | | |
@@ -179,6 +182,22 @@ Then open **http://localhost:8000/docs**. Stop with `Ctrl+C`.
 - Base image `python:3.12-slim`, runtime packages only (`requirements.txt`), runs as a non-root user.
 - Image size: ~865 MB (mostly pandas, scikit-learn, scipy and matplotlib).
 - Rebuilding the image re-downloads the data and retrains the model, which makes it the way to refresh forecasts.
+- CPU threads are limited to 1 (`OMP_NUM_THREADS`, `LOKY_MAX_CPU_COUNT`) so training doesn't stall on small cloud CPUs (see **Deployment**).
+
+## Deployment
+The same Docker image is deployed to **Render** (free web service, Singapore region):
+
+| | |
+|---|---|
+| **Live URL** | https://dengue-early-warning-lwgf.onrender.com/docs |
+| **Deploys** | Automatically on every merge to `main` (after CI passes on the PR) |
+| **Health check** | Render calls `GET /health` and only switches traffic to a new version that answers it |
+| **Port** | Read from the `PORT` variable the platform sets (8000 locally) |
+| **Free-tier limits** | 0.1 CPU, 512 MB RAM; sleeps after inactivity, so the first request can take ~50 s |
+
+**Deployment bug I fixed:** the first cloud build froze for 16 minutes while training, although the same Dockerfile trains in seconds in CI. Small cloud containers report the host machine's CPU count, not their own small share, so scikit-learn's OpenMP started many threads that fought over a fraction of one CPU. Setting `OMP_NUM_THREADS=1` and `LOKY_MAX_CPU_COUNT=1` in the Dockerfile fixed it: the build now takes about 1.5 minutes.
+
+**Next:** deploy the same image to Azure Container Apps (no code changes needed, since the port comes from `PORT`).
 
 ## Project structure
 ```
